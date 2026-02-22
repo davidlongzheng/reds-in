@@ -161,7 +161,7 @@ export default function QuestionEntry({
           <div className="rounded-xl border border-gray-700 bg-[#1a1a1a] px-4 py-3 focus-within:border-red-600">
             <p className="text-lg font-bold text-red-500">Reds in if...</p>
             <textarea
-              placeholder='e.g. "you would rather fight 100 duck-sized horses"'
+              placeholder='e.g. "you would rather fight 100 duck-sized horses or 1 horse-sized duck"'
               value={text}
               onChange={(e) => setText(e.target.value)}
               maxLength={200}
