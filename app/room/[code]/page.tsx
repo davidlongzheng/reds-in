@@ -23,6 +23,10 @@ export default function RoomPage({
   const [votes, setVotes] = useState<Vote[]>([]);
   const [playerId, setPlayerId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [needsJoin, setNeedsJoin] = useState(false);
+  const [joinName, setJoinName] = useState("");
+  const [joinError, setJoinError] = useState("");
+  const [joining, setJoining] = useState(false);
 
   // Keep a ref to questions so the votes callback can access the latest list
   const questionsRef = useRef<Question[]>([]);
@@ -76,11 +80,6 @@ export default function RoomPage({
   // Initial load
   useEffect(() => {
     const pid = localStorage.getItem(`player_${code}`);
-    if (!pid) {
-      router.push("/");
-      return;
-    }
-    setPlayerId(pid);
 
     (async () => {
       const r = await fetchRoom();
@@ -88,11 +87,53 @@ export default function RoomPage({
         router.push("/");
         return;
       }
+
+      if (!pid) {
+        // No player ID — show join form instead of redirecting
+        setNeedsJoin(true);
+        setLoading(false);
+        return;
+      }
+
+      setPlayerId(pid);
       await fetchPlayers(r.id);
       await fetchQuestions(r.id);
       setLoading(false);
     })();
   }, [code, router, fetchRoom, fetchPlayers, fetchQuestions]);
+
+  async function handleJoin() {
+    if (!joinName.trim()) {
+      setJoinError("Enter your name");
+      return;
+    }
+    if (!room) return;
+    if (room.status !== "lobby") {
+      setJoinError("Game already in progress");
+      return;
+    }
+    setJoining(true);
+    setJoinError("");
+
+    const { data: player, error } = await supabase
+      .from("players")
+      .insert({ room_id: room.id, name: joinName.trim() })
+      .select()
+      .single();
+
+    if (error || !player) {
+      setJoinError("Failed to join room");
+      setJoining(false);
+      return;
+    }
+
+    localStorage.setItem(`player_${code}`, player.id);
+    localStorage.setItem(`player_name_${code}`, joinName.trim());
+    setPlayerId(player.id);
+    setNeedsJoin(false);
+    await fetchPlayers(room.id);
+    await fetchQuestions(room.id);
+  }
 
   // Fetch votes when questions change
   useEffect(() => {
@@ -159,7 +200,52 @@ export default function RoomPage({
     fetchVotesForCurrentQuestions,
   ]);
 
-  if (loading || !room || !playerId) {
+  if (loading) {
+    return (
+      <main className="flex min-h-dvh items-center justify-center">
+        <p className="text-gray-400">Loading...</p>
+      </main>
+    );
+  }
+
+  if (needsJoin) {
+    return (
+      <main className="flex min-h-dvh flex-col items-center justify-center p-6">
+        <div className="w-full max-w-sm space-y-6">
+          <div className="text-center">
+            <h1 className="text-4xl font-black tracking-tight">
+              REDS <span className="text-red-600">IN</span>
+            </h1>
+            <p className="mt-2 text-gray-400">
+              Join room <span className="font-mono font-bold text-red-600">{code}</span>
+            </p>
+          </div>
+          <div className="fade-in space-y-4">
+            <input
+              type="text"
+              placeholder="Your name"
+              value={joinName}
+              onChange={(e) => setJoinName(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleJoin()}
+              maxLength={20}
+              className="w-full rounded-xl border border-gray-700 bg-[#1a1a1a] px-4 py-4 text-lg outline-none focus:border-red-600"
+              autoFocus
+            />
+            {joinError && <p className="text-sm text-red-400">{joinError}</p>}
+            <button
+              onClick={handleJoin}
+              disabled={joining}
+              className="w-full rounded-xl bg-red-600 px-6 py-4 text-lg font-bold transition hover:bg-red-700 active:scale-95 disabled:opacity-50"
+            >
+              {joining ? "Joining..." : "Join Room"}
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (!room || !playerId) {
     return (
       <main className="flex min-h-dvh items-center justify-center">
         <p className="text-gray-400">Loading...</p>
