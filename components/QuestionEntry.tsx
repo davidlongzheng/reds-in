@@ -125,10 +125,9 @@ export default function QuestionEntry({
   return (
     <div className="fade-in space-y-6">
       <div className="text-center">
-        <h2 className="text-xl font-bold">Write Your Question</h2>
+        <h2 className="text-xl font-bold">Complete the prompt</h2>
         <p className="mt-1 text-sm text-gray-400">
-          How many people will answer{" "}
-          <span className="font-bold text-red-500">RED</span>?
+          How many will be <span className="font-bold text-red-500">REDS IN</span>?
         </p>
       </div>
 
@@ -159,15 +158,18 @@ export default function QuestionEntry({
         </div>
       ) : (
         <div className="space-y-4">
-          <textarea
-            placeholder='e.g. "Would you rather fight 100 duck-sized horses?"'
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            maxLength={200}
-            rows={3}
-            className="w-full resize-none rounded-xl border border-gray-700 bg-[#1a1a1a] px-4 py-3 text-lg outline-none focus:border-red-600"
-            autoFocus
-          />
+          <div className="rounded-xl border border-gray-700 bg-[#1a1a1a] px-4 py-3 focus-within:border-red-600">
+            <p className="text-lg font-bold text-red-500">Reds in if...</p>
+            <textarea
+              placeholder='e.g. "you would rather fight 100 duck-sized horses"'
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              maxLength={200}
+              rows={2}
+              className="mt-1 w-full resize-none bg-transparent text-lg outline-none"
+              autoFocus
+            />
+          </div>
 
           <div className="rounded-xl border border-gray-800 bg-[#1a1a1a] p-4">
             <label className="mb-3 block text-sm text-gray-400">

@@ -99,7 +99,8 @@ export default function ResultsScreen({
       </div>
 
       <div className="rounded-xl border border-gray-800 bg-[#1a1a1a] p-4">
-        <p className="text-center text-lg font-bold">{question.text}</p>
+        <p className="text-center text-sm font-bold text-red-500">Reds in if...</p>
+        <p className="mt-1 text-center text-lg font-bold">{question.text}</p>
       </div>
 
       {/* Vote counts */}

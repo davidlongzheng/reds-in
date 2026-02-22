@@ -72,7 +72,8 @@ export default function VotingScreen({
       </div>
 
       <div className="rounded-xl border border-gray-800 bg-[#1a1a1a] p-6">
-        <p className="text-center text-2xl font-bold leading-relaxed">
+        <p className="text-center text-lg font-bold text-red-500">Reds in if...</p>
+        <p className="mt-2 text-center text-2xl font-bold leading-relaxed">
           {question.text}
         </p>
       </div>
