@@ -32,6 +32,7 @@ export default function QuestionEntry({
   const [timeLeft, setTimeLeft] = useState(120);
   const [submitting, setSubmitting] = useState(false);
   const advancingRef = useRef(false);
+  const advanceRef = useRef<() => void>(() => {});
 
   const hasSubmitted = questions.some((q) => q.player_id === playerId);
   const allSubmitted = players.every((p) =>
@@ -43,7 +44,6 @@ export default function QuestionEntry({
     if (advancingRef.current) return;
     advancingRef.current = true;
 
-    // Re-fetch questions to get the latest state
     const { data: latestQuestions } = await supabase
       .from("questions")
       .select()
@@ -57,7 +57,6 @@ export default function QuestionEntry({
 
     const order = shuffleArray(qs.map((q) => q.id));
 
-    // Only transition if still in question_entry (prevents duplicate transitions)
     await supabase
       .from("rooms")
       .update({
@@ -69,7 +68,10 @@ export default function QuestionEntry({
       .eq("status", "question_entry");
   }, [room.id, questions]);
 
-  // Countdown timer
+  // Keep ref in sync so the timer can call the latest version without re-running
+  advanceRef.current = advanceToVoting;
+
+  // Countdown timer — only depends on question_deadline (stable during phase)
   useEffect(() => {
     if (!room.question_deadline) return;
 
@@ -83,14 +85,14 @@ export default function QuestionEntry({
       setTimeLeft(remaining);
 
       if (remaining <= 0) {
-        advanceToVoting();
+        advanceRef.current();
       }
     };
 
     update();
     const interval = setInterval(update, 1000);
     return () => clearInterval(interval);
-  }, [room.question_deadline, advanceToVoting]);
+  }, [room.question_deadline]);
 
   // Auto-advance when all submitted — only the submitter's client triggers
   // (their handleSubmit calls advanceToVoting after insert)
