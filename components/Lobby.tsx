@@ -12,6 +12,13 @@ interface Props {
 
 export default function Lobby({ room, players, playerId }: Props) {
   const [starting, setStarting] = useState(false);
+  const [kicking, setKicking] = useState<string | null>(null);
+
+  async function handleKick(targetId: string) {
+    setKicking(targetId);
+    await supabase.from("players").delete().eq("id", targetId);
+    setKicking(null);
+  }
 
   async function handleStart() {
     if (players.length < 1) return;
@@ -49,15 +56,26 @@ export default function Lobby({ room, players, playerId }: Props) {
           {players.map((p) => (
             <li
               key={p.id}
-              className="flex items-center gap-3 rounded-lg bg-[#0a0a0a] px-4 py-3"
+              className="flex items-center justify-between rounded-lg bg-[#0a0a0a] px-4 py-3"
             >
-              <div className="h-2 w-2 rounded-full bg-green-500" />
-              <span className="font-medium">
-                {p.name}
-                {p.id === playerId && (
-                  <span className="ml-2 text-sm text-gray-500">(you)</span>
-                )}
-              </span>
+              <div className="flex items-center gap-3">
+                <div className="h-2 w-2 rounded-full bg-green-500" />
+                <span className="font-medium">
+                  {p.name}
+                  {p.id === playerId && (
+                    <span className="ml-2 text-sm text-gray-500">(you)</span>
+                  )}
+                </span>
+              </div>
+              {p.id !== playerId && (
+                <button
+                  onClick={() => handleKick(p.id)}
+                  disabled={kicking === p.id}
+                  className="rounded-lg px-2 py-1 text-xs font-medium text-gray-500 transition hover:bg-red-900/30 hover:text-red-400"
+                >
+                  {kicking === p.id ? "..." : "Kick"}
+                </button>
+              )}
             </li>
           ))}
         </ul>

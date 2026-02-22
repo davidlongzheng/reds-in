@@ -27,6 +27,7 @@ export default function RoomPage({
   const [joinName, setJoinName] = useState("");
   const [joinError, setJoinError] = useState("");
   const [joining, setJoining] = useState(false);
+  const [ending, setEnding] = useState(false);
 
   // Keep a ref to questions so the votes callback can access the latest list
   const questionsRef = useRef<Question[]>([]);
@@ -133,6 +134,16 @@ export default function RoomPage({
     setNeedsJoin(false);
     await fetchPlayers(room.id);
     await fetchQuestions(room.id);
+  }
+
+  async function handleEndGame() {
+    if (!room) return;
+    setEnding(true);
+    await supabase
+      .from("rooms")
+      .update({ status: "game_over" })
+      .eq("id", room.id);
+    setEnding(false);
   }
 
   // Fetch votes when questions change
@@ -267,8 +278,31 @@ export default function RoomPage({
     : [];
 
   return (
-    <main className="flex min-h-dvh flex-col items-center p-4 pt-8">
+    <main className="flex min-h-dvh flex-col items-center p-4 pt-4">
       <div className="w-full max-w-md">
+        {/* Header */}
+        <div className="mb-6 flex items-center justify-between">
+          <button
+            onClick={() => router.push("/")}
+            className="rounded-lg px-3 py-1.5 text-sm text-gray-400 transition hover:bg-[#1a1a1a] hover:text-white"
+          >
+            Home
+          </button>
+          <span className="font-mono text-sm font-bold text-gray-600">{code}</span>
+          {room.status !== "lobby" && room.status !== "game_over" && (
+            <button
+              onClick={handleEndGame}
+              disabled={ending}
+              className="rounded-lg px-3 py-1.5 text-sm text-gray-400 transition hover:bg-red-900/30 hover:text-red-400"
+            >
+              {ending ? "..." : "End Game"}
+            </button>
+          )}
+          {(room.status === "lobby" || room.status === "game_over") && (
+            <div className="w-[72px]" />
+          )}
+        </div>
+
         {room.status === "lobby" && (
           <Lobby room={room} players={players} playerId={playerId} />
         )}
