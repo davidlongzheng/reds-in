@@ -14,7 +14,7 @@ export default function Lobby({ room, players, playerId }: Props) {
   const [starting, setStarting] = useState(false);
 
   async function handleStart() {
-    if (players.length < 3) return;
+    if (players.length < 1) return;
     setStarting(true);
 
     const deadline = new Date(Date.now() + 2 * 60 * 1000).toISOString();
@@ -63,15 +63,15 @@ export default function Lobby({ room, players, playerId }: Props) {
         </ul>
       </div>
 
-      {players.length < 3 && (
+      {players.length < 1 && (
         <p className="text-center text-sm text-gray-500">
-          Need at least 3 players to start
+          Need at least 1 player to start
         </p>
       )}
 
       <button
         onClick={handleStart}
-        disabled={players.length < 3 || starting}
+        disabled={players.length < 1 || starting}
         className="w-full rounded-xl bg-red-600 px-6 py-4 text-lg font-bold transition hover:bg-red-700 active:scale-95 disabled:opacity-50"
       >
         {starting ? "Starting..." : "Start Game"}
