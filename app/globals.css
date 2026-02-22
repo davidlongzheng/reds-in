@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #0a0a0a;
+  --card: #1a1a1a;
+  --red: #dc2626;
+  --red-glow: rgba(220, 38, 38, 0.4);
+}
+
+body {
+  background: var(--bg);
+  color: white;
+  font-family: system-ui, -apple-system, sans-serif;
+  min-height: 100dvh;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px var(--red-glow); }
+  50% { box-shadow: 0 0 40px var(--red-glow), 0 0 60px var(--red-glow); }
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+@keyframes confetti-fall {
+  0% { transform: translateY(-100%) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+.confetti-piece {
+  position: fixed;
+  top: 0;
+  width: 10px;
+  height: 10px;
+  animation: confetti-fall 3s ease-in forwards;
+}
